@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>LocalLens – Community Board</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ====== STYLES ====== -->
+  <style>
+    :root {
+      --bg: #0f172a;
+      --bg-elevated: #111827;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.15);
+      --accent-strong: #0ea5e9;
+      --danger: #f97373;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: #1f2937;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.45);
+      --transition-fast: 0.18s ease-out;
+      --transition-med: 0.25s ease-out;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background: radial-gradient(circle at top, #1e293b, #020617 45%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 18px;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 1180px;
+      background: linear-gradient(145deg, #020617, #020617 40%, #020617);
+      border-radius: 26px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ====== HEADER ====== */
+
+    .app-header {
+      padding: 18px 26px 6px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      background: radial-gradient(circle at 20% 20%, #38bdf8, #0ea5e9 50%, #1d4ed8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 21px;
+      color: white;
+      box-shadow: 0 8px 26px rgba(59, 130, 246, 0.8);
+    }
+
+    .brand-text h1 {
+      font-size: 1.2rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .brand-text p {
+      font-size: 0.76rem;
+      color: var(--muted);
+    }
+
+    .header-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      font-size: 0.75rem;
+      border-radius: 999px;
+      padding: 4px 10px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.35);
+    }
+
+    .btn {
+      border: none;
+      border-radius: 999px;
+      padding: 9px 17px;
+      font-size: 0.86rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-weight: 500;
+      transition: transform var(--transition-fast),
+        box-shadow var(--transition-fast), background var(--transition-fast),
+        border var(--transition-fast);
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      color: white;
+      box-shadow: 0 12px 26px rgba(59, 130, 246, 0.75);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 32px rgba(59, 130, 246, 0.85);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: var(--muted);
+    }
+
+    .btn-ghost:hover {
+      border-color: rgba(148, 163, 184, 0.7);
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    .btn-icon {
+      font-size: 1.05rem;
+    }
+
+    /* ====== MAIN LAYOUT ====== */
+
+    .app-main {
+      display: grid;
+      grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
+      gap: 18px;
+      padding: 16px 20px 20px;
+    }
+
+    /* ====== SIDEBAR / FILTERS ====== */
+
+    .sidebar {
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: var(--radius-lg);
+      padding: 14px 14px 16px;
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .section-title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .field-label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .input,
+    select {
+      width: 100%;
+      padding: 8px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(31, 41, 55, 0.9);
+      background: radial-gradient(circle at top left, #020617, #020617 55%);
+      color: var(--text);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border var(--transition-fast),
+        box-shadow var(--transition-fast), background var(--transition-fast),
+        transform var(--transition-fast);
+    }
+
+    .input::placeholder {
+      color: rgba(148, 163, 184, 0.7);
+    }
+
+    .input:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .filter-row .input {
+      flex: 1;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip {
+      font-size: 0.72rem;
+      border-radius: 999px;
+      padding: 4px 10px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--muted);
+      cursor: pointer;
+      transition: background var(--transition-fast), color var(--transition-fast),
+        border var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .chip.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+      transform: translateY(-1px);
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .legend-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      margin-right: 5px;
+      display: inline-block;
+    }
+
+    /* ====== TIMELINE / POSTS ====== */
+
+    .timeline {
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: var(--radius-lg);
+      padding: 12px 14px 14px;
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .timeline-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding: 4px 4px 8px;
+    }
+
+    .timeline-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .timeline-title span {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(
+        to right,
+        transparent,
+        rgba(148, 163, 184, 0.45),
+        transparent
+      );
+    }
+
+    .post-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: calc(100vh - 220px);
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .post-list::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .post-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .post-list::-webkit-scrollbar-thumb {
+      background: rgba(51, 65, 85, 0.9);
+      border-radius: 999px;
+    }
+
+    .post-card {
+      background: radial-gradient(circle at top left, #020617, #020617 58%);
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(30, 64, 175, 0.7);
+      padding: 10px 11px;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 10px;
+      position: relative;
+      transition: transform var(--transition-med),
+        box-shadow var(--transition-med), border var(--transition-med),
+        background var(--transition-med);
+    }
+
+    .post-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 30px rgba(15, 23, 42, 0.85);
+      border-color: var(--accent);
+      background: radial-gradient(circle at top left, #020617, #020617 70%);
+    }
+
+    .post-timeline-bar {
+      width: 3px;
+      border-radius: 999px;
+      background: linear-gradient(to bottom, var(--accent), #6366f1);
+    }
+
+    .post-main {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .post-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: var(--muted);
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .post-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .badge {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(15, 23, 42, 0.95);
+    }
+
+    .badge.category {
+      border-color: rgba(56, 189, 248, 0.7);
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--accent-strong);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    .badge.location {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .badge.location span {
+      font-size: 0.75rem;
+    }
+
+    .post-title {
+      font-size: 0.96rem;
+      font-weight: 600;
+    }
+
+    .post-body {
+      font-size: 0.82rem;
+      color: #d1d5db;
+      line-height: 1.35rem;
+    }
+
+    .post-footer {
+      margin-top: 2px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .post-actions-left,
+    .post-actions-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .icon-btn {
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(15, 23, 42, 0.95);
+      padding: 4px 9px;
+      font-size: 0.78rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: background var(--transition-fast),
+        border var(--transition-fast), transform var(--transition-fast),
+        color var(--transition-fast);
+    }
+
+    .icon-btn:hover {
+      border-color: var(--accent);
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--accent-strong);
+      transform: translateY(-1px);
+    }
+
+    .icon-btn.danger:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .icon-btn .emoji {
+      font-size: 0.86rem;
+    }
+
+    .likes-count {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .no-posts {
+      font-size: 0.82rem;
+      color: var(--muted);
+      text-align: center;
+      padding: 35px 10px;
+    }
+
+    .no-posts strong {
+      color: var(--accent-strong);
+    }
+
+    /* ====== COMMENTS PILL ====== */
+
+    .comments {
+      margin-top: 4px;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px dashed rgba(148, 163, 184, 0.45);
+      padding: 6px 9px;
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .comments.visible {
+      display: flex;
+    }
+
+    .comment {
+      font-size: 0.78rem;
+      color: #cbd5f5;
+    }
+
+    .comment-input-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 3px;
+    }
+
+    .comment-input-row input {
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: none;
+      outline: none;
+      flex: 1;
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--text);
+      font-size: 0.78rem;
+    }
+
+    .comment-input-row button {
+      border-radius: 999px;
+      border: none;
+      padding: 5px 9px;
+      font-size: 0.78rem;
+      background: var(--accent-strong);
+      color: white;
+      cursor: pointer;
+    }
+
+    /* ====== MODAL ====== */
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 40;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      background: radial-gradient(circle at top left, #020617, #020617 60%);
+      border-radius: 22px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      width: 100%;
+      max-width: 510px;
+      padding: 16px 18px 18px;
+      box-shadow: var(--shadow-soft);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .modal-body {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .modal-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .modal-row > * {
+      flex: 1;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 80px;
+      resize: vertical;
+      padding: 8px 9px;
+      border-radius: 14px;
+      border: 1px solid rgba(31, 41, 55, 0.9);
+      background: radial-gradient(circle at top left, #020617, #020617 55%);
+      color: var(--text);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border var(--transition-fast),
+        box-shadow var(--transition-fast), background var(--transition-fast),
+        transform var(--transition-fast);
+    }
+
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .modal-footer {
+      margin-top: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .hint {
+      font-size: 0.74rem;
+      color: var(--muted);
+    }
+
+    /* ====== RESPONSIVE ====== */
+
+    @media (max-width: 840px) {
+      .app-main {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .sidebar {
+        order: 2;
+      }
+
+      .timeline {
+        order: 1;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .app-header {
+        padding: 14px 16px 6px;
+      }
+
+      .app-main {
+        padding: 12px;
+      }
+
+      .header-actions {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .post-list {
+        max-height: none;
+      }
+
+      .modal {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- ========= HEADER ========= -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">L</div>
+        <div class="brand-text">
+          <h1>LocalLens</h1>
+          <p>Digital community bulletin board</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="pill">
+          <span class="pill-dot"></span>
+          <span>Live · Neighborhood feed</span>
+        </div>
+        <button id="btnAddPostTop" class="btn btn-primary">
+          <span class="btn-icon">＋</span>
+          <span>New announcement</span>
+        </button>
+        <button class="btn btn-ghost" title="Clears everything from this browser">
+          <span class="btn-icon">🧹</span>
+          <span id="btnClearAll">Reset board</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ========= MAIN ========= -->
+    <main class="app-main">
+      <!-- === SIDEBAR / FILTERS === -->
+      <aside class="sidebar">
+        <div>
+          <div class="section-title">Filters</div>
+
+          <div class="field-group">
+            <div class="field-label">Search title or content</div>
+            <div class="filter-row">
+              <input
+                id="searchInput"
+                type="text"
+                class="input"
+                placeholder="eg. blood donation, part-time job"
+              />
+            </div>
+          </div>
+
+          <div class="field-group" style="margin-top: 8px">
+            <div class="field-label">Category</div>
+            <select id="categoryFilter">
+              <option value="all">All categories</option>
+              <option value="Events">Events</option>
+              <option value="Jobs">Jobs</option>
+              <option value="Alerts">Alerts</option>
+              <option value="General">General</option>
+            </select>
+          </div>
+
+          <div class="field-group" style="margin-top: 8px">
+            <div class="field-label">Location filter</div>
+            <input
+              id="locationFilter"
+              type="text"
+              class="input"
+              placeholder="Area / Colony / Landmark"
+            />
+          </div>
+        </div>
+
+        <div style="margin-top: 4px">
+          <div class="section-title">Quick view</div>
+          <div class="chip-row">
+            <button class="chip active" data-chip="all">All</button>
+            <button class="chip" data-chip="today">Today</button>
+            <button class="chip" data-chip="events">Events</button>
+            <button class="chip" data-chip="alerts">Alerts</button>
+          </div>
+
+          <div class="stats">
+            <span><span class="legend-dot"></span><span id="totalPosts">0</span> posts</span>
+            <span id="filteredCount">0 shown</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- === TIMELINE / POSTS === -->
+      <section class="timeline">
+        <div class="timeline-header">
+          <div class="timeline-title">
+            Neighborhood feed
+            <span>Latest community updates</span>
+          </div>
+          <button id="btnAddPostRight" class="btn btn-primary">
+            <span class="btn-icon">＋</span>
+            Post update
+          </button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div id="postList" class="post-list">
+          <!-- posts injected via JS -->
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ========= MODAL ========= -->
+  <div id="modalBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle">Create update</div>
+        <button id="modalClose" class="btn btn-ghost">
+          <span class="btn-icon">✕</span>
+          Close
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div>
+          <div class="field-label">Title *</div>
+          <input
+            id="postTitle"
+            type="text"
+            class="input"
+            placeholder="Short & clear – e.g. 'Weekend clean-up drive'"
+          />
+        </div>
+
+        <div class="modal-row">
+          <div>
+            <div class="field-label">Category *</div>
+            <select id="postCategory">
+              <option value="Events">Events</option>
+              <option value="Jobs">Jobs</option>
+              <option value="Alerts">Alerts</option>
+              <option value="General">General</option>
+            </select>
+          </div>
+          <div>
+            <div class="field-label">Location *</div>
+            <input
+              id="postLocation"
+              type="text"
+              class="input"
+              placeholder="eg. Sector 8, Park Street"
+            />
+          </div>
+        </div>
+
+        <div>
+          <div class="field-label">Details *</div>
+          <textarea
+            id="postBody"
+            placeholder="Share all important information – date, time, contact, what people should bring, etc."
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div class="hint">Fields marked with * are mandatory. Posts stay only in this browser (no backend).</div>
+        <div style="display: flex; gap: 6px">
+          <button id="modalClear" class="btn btn-ghost">Clear</button>
+          <button id="modalSave" class="btn btn-primary">
+            <span class="btn-icon">📌</span>
+            <span id="modalSaveText">Post to board</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========= SCRIPT ========= -->
+  <script>
+    // ---------- DATA & STORAGE ----------
+    const STORAGE_KEY = "locallens_posts_v1";
+
+    /** @type {Array} */
+    let posts = [];
+    let currentEditId = null;
+
+    function loadPosts() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        // seed with sample data for first run
+        posts = [
+          {
+            id: Date.now() - 200000,
+            title: "Weekend Street Clean-up Drive",
+            body:
+              "Join us this Sunday, 7 AM at Lakeside Park for a community clean-up. Gloves and garbage bags will be provided. Refreshments for volunteers.",
+            category: "Events",
+            location: "Lakeside Park, Ward 4",
+            createdAt: new Date().toISOString(),
+            likes: 4,
+            comments: [
+              "I’ll bring extra gloves.",
+              "Can students get participation certificates?"
+            ]
+          },
+          {
+            id: Date.now() - 100000,
+            title: "Part-time Tuition Teacher Required",
+            body:
+              "Looking for a B.Tech student who can teach Maths and Physics to 9th standard student, 5 days a week, 1.5 hours. Stipend ₹4,000/month.",
+            category: "Jobs",
+            location: "Near City Library",
+            createdAt: new Date().toISOString(),
+            likes: 2,
+            comments: []
+          },
+          {
+            id: Date.now() - 50000,
+            title: "Water Supply Disruption – Today Evening",
+            body:
+              "Municipal corporation has informed that water supply will be disrupted from 6 PM to 10 PM for pipeline maintenance. Please store water in advance.",
+            category: "Alerts",
+            location: "Block C & D",
+            createdAt: new Date().toISOString(),
+            likes: 6,
+            comments: ["Thanks for the heads-up!"]
+          }
+        ];
+        savePosts();
+      } else {
+        posts = JSON.parse(raw);
+      }
+    }
+
+    function savePosts() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+    }
+
+    // ---------- UTILITIES ----------
+    function formatDate(isoString) {
+      const d = new Date(isoString);
+      if (Number.isNaN(d.getTime())) return "Just now";
+      const now = new Date();
+      const diffMs = now - d;
+      const diffMin = Math.floor(diffMs / 60000);
+
+      if (diffMin < 1) return "Just now";
+      if (diffMin < 60) return diffMin + " min ago";
+
+      const diffHr = Math.floor(diffMin / 60);
+      if (diffHr < 24) return diffHr + " hr" + (diffHr > 1 ? "s" : "") + " ago";
+
+      const diffDay = Math.floor(diffHr / 24);
+      if (diffDay <= 7) {
+        return diffDay + " day" + (diffDay > 1 ? "s" : "") + " ago";
+      }
+
+      return (
+        d.toLocaleDateString(undefined, {
+          day: "2-digit",
+          month: "short",
+          hour: "2-digit",
+          minute: "2-digit"
+        }) + ""
+      );
+    }
+
+    function isToday(isoString) {
+      const d = new Date(isoString);
+      const today = new Date();
+      return (
+        d.getFullYear() === today.getFullYear() &&
+        d.getMonth() === today.getMonth() &&
+        d.getDate() === today.getDate()
+      );
+    }
+
+    // ---------- RENDER ----------
+    const postListEl = document.getElementById("postList");
+    const totalPostsEl = document.getElementById("totalPosts");
+    const filteredCountEl = document.getElementById("filteredCount");
+
+    const searchInputEl = document.getElementById("searchInput");
+    const categoryFilterEl = document.getElementById("categoryFilter");
+    const locationFilterEl = document.getElementById("locationFilter");
+    const chips = Array.from(document.querySelectorAll(".chip"));
+
+    function getFilterState() {
+      const query = searchInputEl.value.trim().toLowerCase();
+      const category = categoryFilterEl.value;
+      const location = locationFilterEl.value.trim().toLowerCase();
+      const activeChip = chips.find((c) => c.classList.contains("active"));
+      const chipKey = activeChip ? activeChip.dataset.chip : "all";
+      return { query, category, location, chipKey };
+    }
+
+    function filterPosts() {
+      const state = getFilterState();
+
+      return posts.filter((p) => {
+        // category
+        if (state.category !== "all" && p.category !== state.category) {
+          return false;
+        }
+        // chip quick filter
+        if (state.chipKey === "today" && !isToday(p.createdAt)) {
+          return false;
+        }
+        if (state.chipKey === "events" && p.category !== "Events") {
+          return false;
+        }
+        if (state.chipKey === "alerts" && p.category !== "Alerts") {
+          return false;
+        }
+
+        // search query
+        if (state.query) {
+          const haystack =
+            (p.title + " " + p.body).toLowerCase();
+          if (!haystack.includes(state.query)) return false;
+        }
+
+        // location filter
+        if (state.location) {
+          if (!p.location.toLowerCase().includes(state.location)) return false;
+        }
+
+        return true;
+      });
+    }
+
+    function renderPosts() {
+      totalPostsEl.textContent = posts.length.toString();
+      const filtered = filterPosts();
+      filteredCountEl.textContent = filtered.length + " shown";
+
+      postListEl.innerHTML = "";
+
+      if (filtered.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "no-posts";
+        empty.innerHTML =
+          "No posts match your filters.<br/><br/><strong>Create the first announcement for your area!</strong>";
+        postListEl.appendChild(empty);
+        return;
+      }
+
+      filtered
+        .slice() // copy
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .forEach((post) => {
+          const card = document.createElement("article");
+          card.className = "post-card";
+          card.dataset.id = post.id;
+
+          card.innerHTML = `
+            <div class="post-timeline-bar"></div>
+            <div class="post-main">
+              <div class="post-meta">
+                <div class="post-tags">
+                  <span class="badge category">${post.category}</span>
+                  <span class="badge location">
+                    <span>📍</span>
+                    <span>${post.location}</span>
+                  </span>
+                </div>
+                <span>${formatDate(post.createdAt)}</span>
+              </div>
+              <h2 class="post-title">${escapeHtml(post.title)}</h2>
+              <p class="post-body">${escapeHtml(post.body)}</p>
+              <div class="post-footer">
+                <div class="post-actions-left">
+                  <button class="icon-btn btn-like">
+                    <span class="emoji">❤️</span>
+                    <span>Like</span>
+                  </button>
+                  <span class="likes-count">${
+                    post.likes || 0
+                  } like${(post.likes || 0) === 1 ? "" : "s"}</span>
+                  <button class="icon-btn btn-comments-toggle">
+                    <span class="emoji">💬</span>
+                    <span>Comments (${post.comments.length})</span>
+                  </button>
+                </div>
+                <div class="post-actions-right">
+                  <button class="icon-btn btn-edit">
+                    <span class="emoji">✏️</span>
+                    <span>Edit</span>
+                  </button>
+                  <button class="icon-btn btn-delete danger">
+                    <span class="emoji">🗑️</span>
+                    <span>Delete</span>
+                  </button>
+                </div>
+              </div>
+              <div class="comments ${
+                post.comments.length ? "visible" : ""
+              }">
+                <div class="comments-list">
+                  ${post.comments
+                    .map(
+                      (c) =>
+                        `<div class="comment">• ${escapeHtml(c)}</div>`
+                    )
+                    .join("")}
+                </div>
+                <div class="comment-input-row">
+                  <input type="text" placeholder="Add a public comment..." />
+                  <button>Post</button>
+                </div>
+              </div>
+            </div>
+          `;
+
+          // Attach handlers for this card
+          const likeBtn = card.querySelector(".btn-like");
+          likeBtn.addEventListener("click", () => handleLike(post.id));
+
+          const editBtn = card.querySelector(".btn-edit");
+          editBtn.addEventListener("click", () => openEditModal(post.id));
+
+          const deleteBtn = card.querySelector(".btn-delete");
+          deleteBtn.addEventListener("click", () => handleDelete(post.id));
+
+          const commentsToggleBtn = card.querySelector(
+            ".btn-comments-toggle"
+          );
+          const commentsEl = card.querySelector(".comments");
+          commentsToggleBtn.addEventListener("click", () => {
+            commentsEl.classList.toggle("visible");
+          });
+
+          const commentInput = card.querySelector(
+            ".comment-input-row input"
+          );
+          const commentSubmit = card.querySelector(
+            ".comment-input-row button"
+          );
+          commentSubmit.addEventListener("click", () =>
+            handleAddComment(post.id, commentInput.value)
+          );
+          commentInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+              handleAddComment(post.id, commentInput.value);
+            }
+          });
+
+          postListEl.appendChild(card);
+        });
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    // ---------- POST ACTIONS ----------
+    function handleLike(id) {
+      const idx = posts.findIndex((p) => p.id === id);
+      if (idx === -1) return;
+      posts[idx].likes = (posts[idx].likes || 0) + 1;
+      savePosts();
+      renderPosts();
+    }
+
+    function handleDelete(id) {
+      if (
+        !confirm(
+          "Delete this post from the board? This action cannot be undone."
+        )
+      )
+        return;
+      posts = posts.filter((p) => p.id !== id);
+      savePosts();
+      renderPosts();
+    }
+
+    function handleAddComment(id, text) {
+      text = text.trim();
+      if (!text) return;
+      const idx = posts.findIndex((p) => p.id === id);
+      if (idx === -1) return;
+      posts[idx].comments.push(text);
+      savePosts();
+      renderPosts();
+    }
+
+    // ---------- MODAL ----------
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalSaveText = document.getElementById("modalSaveText");
+
+    const postTitleEl = document.getElementById("postTitle");
+    const postCategoryEl = document.getElementById("postCategory");
+    const postLocationEl = document.getElementById("postLocation");
+    const postBodyEl = document.getElementById("postBody");
+
+    function resetForm() {
+      postTitleEl.value = "";
+      postCategoryEl.value = "Events";
+      postLocationEl.value = "";
+      postBodyEl.value = "";
+    }
+
+    function openCreateModal() {
+      currentEditId = null;
+      modalTitle.textContent = "Create update";
+      modalSaveText.textContent = "Post to board";
+      resetForm();
+      modalBackdrop.classList.add("open");
+      postTitleEl.focus();
+    }
+
+    function openEditModal(id) {
+      const post = posts.find((p) => p.id === id);
+      if (!post) return;
+
+      currentEditId = id;
+      modalTitle.textContent = "Edit update";
+      modalSaveText.textContent = "Save changes";
+      postTitleEl.value = post.title;
+      postCategoryEl.value = post.category;
+      postLocationEl.value = post.location;
+      postBodyEl.value = post.body;
+
+      modalBackdrop.classList.add("open");
+      postTitleEl.focus();
+    }
+
+    function closeModal() {
+      modalBackdrop.classList.remove("open");
+    }
+
+    // ---------- FORM SUBMIT ----------
+    function handleSavePost() {
+      const title = postTitleEl.value.trim();
+      const category = postCategoryEl.value;
+      const location = postLocationEl.value.trim();
+      const body = postBodyEl.value.trim();
+
+      if (!title || !category || !location || !body) {
+        alert("Please fill in all required fields.");
+        return;
+      }
+
+      if (currentEditId) {
+        const idx = posts.findIndex((p) => p.id === currentEditId);
+        if (idx !== -1) {
+          posts[idx].title = title;
+          posts[idx].category = category;
+          posts[idx].location = location;
+          posts[idx].body = body;
+        }
+      } else {
+        const newPost = {
+          id: Date.now(),
+          title,
+          category,
+          location,
+          body,
+          createdAt: new Date().toISOString(),
+          likes: 0,
+          comments: []
+        };
+        posts.push(newPost);
+      }
+
+      savePosts();
+      renderPosts();
+      closeModal();
+    }
+
+    // ---------- CLEAR ALL ----------
+    document.getElementById("btnClearAll").addEventListener("click", () => {
+      if (
+        !confirm(
+          "This will remove all posts saved in this browser. Continue?"
+        )
+      )
+        return;
+      posts = [];
+      savePosts();
+      renderPosts();
+    });
+
+    // ---------- EVENT LISTENERS ----------
+    document
+      .getElementById("btnAddPostTop")
+      .addEventListener("click", openCreateModal);
+    document
+      .getElementById("btnAddPostRight")
+      .addEventListener("click", openCreateModal);
+
+    document.getElementById("modalClose").addEventListener("click", closeModal);
+    document.getElementById("modalSave").addEventListener("click", handleSavePost);
+    document.getElementById("modalClear").addEventListener("click", resetForm);
+
+    modalBackdrop.addEventListener("click", (e) => {
+      if (e.target === modalBackdrop) {
+        closeModal();
+      }
+    });
+
+    searchInputEl.addEventListener("input", renderPosts);
+    categoryFilterEl.addEventListener("change", renderPosts);
+    locationFilterEl.addEventListener("input", renderPosts);
+
+    chips.forEach((chip) => {
+      chip.addEventListener("click", () => {
+        chips.forEach((c) => c.classList.remove("active"));
+        chip.classList.add("active");
+        renderPosts();
+      });
+    });
+
+    // ---------- INIT ----------
+    loadPosts();
+    renderPosts();
+  </script>
+</body>
+</html>
